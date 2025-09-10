@@ -1,0 +1,15 @@
+body {
+    font-family: sans-serif;
+    text-align: center;
+    margin-top: 80px;
+  }
+  .container {
+    max-width: 600px;
+    margin: auto;
+  }
+  input[type="file"] {
+    margin: 20px 0;
+  }
+  .link-area {
+    margin-top: 30px;
+  }
