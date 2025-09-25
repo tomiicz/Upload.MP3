@@ -2,29 +2,34 @@ const express = require("express");
 const multer = require("multer");
 const cors = require("cors");
 const path = require("path");
-const app = express();
+const cloudinary = require("cloudinary").v2;
+const { CloudinaryStorage } = require("multer-storage-cloudinary");
 
+const app = express();
 app.use(cors());
 app.use(express.static("public"));
-app.use("/uploads", express.static("uploads")); // Enlaces públicos
 
-// Configurar almacenamiento con Multer
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, "uploads/");
-  },
-  filename: function (req, file, cb) {
-    const ext = path.extname(file.originalname);
-    const name = Date.now() + ext;
-    cb(null, name);
+// Configurar Cloudinary desde variables de entorno
+cloudinary.config({
+  cloud_name: process.env.CLOUD_NAME,
+  api_key: process.env.API_KEY,
+  api_secret: process.env.API_SECRET
+});
+
+// Configurar Multer con Cloudinary como almacenamiento
+const storage = new CloudinaryStorage({
+  cloudinary: cloudinary,
+  params: {
+    folder: "uploads", // carpeta dentro de tu cuenta de Cloudinary
+    resource_type: "auto" // permite subir imágenes, audios, etc.
   }
 });
 
 const upload = multer({ storage: storage });
 
-// Ruta para subir archivos
+// Ruta para subir archivo
 app.post("/upload", upload.single("file"), (req, res) => {
-  const fileUrl = `${req.protocol}://${req.get("host")}/uploads/${req.file.filename}`;
+  const fileUrl = req.file.path;
   res.json({ success: true, url: fileUrl });
 });
 
